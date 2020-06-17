@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Module evolution stage 2</title>
+  </head>
+  <body>
+    <h1>模块化演变（第二阶段）</h1>
+    <h2>基于命名空间划分模块的方式</h2>
+    <script src="module-a.js"></script>
+    <script src="module-b.js"></script>
+    <script>
+      // 一定程度避免命名冲突
+      moduleA.method1();
+      moduleB.method1();
+
+      // 模块成员仍然可以被修改
+      moduleA.name = "foo";
+    </script>
+  </body>
+</html>
