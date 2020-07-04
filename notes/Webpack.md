@@ -1,3 +1,5 @@
+
+
 # Webpack 模块打包工具笔记
 
 > 作者: Bruski
@@ -50,9 +52,7 @@ module.exports = {
 };
 ```
 
-### 模式
-
-mode
+模式 mode
 
 参数支持:
 
@@ -155,7 +155,7 @@ webpack只是打包工具, 核心只识别`import/export`,并不能转换ES2015�
 
 ## Webpack模块加载方式
 
-### 兼容多种
+兼容多种方式:
 
 1. 遵循ES Module的import
 
@@ -167,23 +167,189 @@ webpack只是打包工具, 核心只识别`import/export`,并不能转换ES2015�
 
 1. js的import
 2. css的@import, url函数
-3. html标签,  href, src等
+3. html标签的属性: href, src等
 
 ## Webpack核心工作过程
 
 以JS为入口, 加载所有依赖, 交给对应的Loader处理,最后输出打包结果, 其中Loader是绝对核心.
 
+## 开发一个Loader
 
+Loader实际上就是读取文件文本, 进行自定义处理, 返回处理后含JavaScript代码的文本内容.
 
+如开发一个解析markdown的loader, 借助`marked`包,将markdown文本转为html代码, 返回导出模块的js文本
 
+```javascript
+const marked = require("marked");
 
+module.exports = (source) => {
+  console.log(source);
+  return `export default ${JSON.stringify(marked(source))}`;
+};
+```
 
+在`main.js`中拿到的就是转换格式后的html文本
 
+```javascript
+import about from "./about.md";
 
+document.write(about);
+```
 
+或者改造成管道, 修改上述markdown-loader:
 
+```javascript
+const marked = require("marked");
 
+module.exports = (source) => marked(source);
+```
 
+结合`html-loader`实现markdown->html文本->html-loader的管道, 可以轻松实现markdown转html.
+
+## Webpack插件机制
+
+Webpack的扩展, 用于打造自动化工作流
+
+### 自动清除目录
+
+Plugin: `clean-webpack-plugin`
+
+Webpack只是覆盖,不会删除遗留文件; 此插件可以自动清除 `dist` 下的文件
+
+使用示例:
+
+```javascript
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+module.exports = {
+    // ...
+  	plugins: [new CleanWebpackPlugin()],
+};
+```
+
+### 自动生成HTML插件
+
+Plugin: `html-webpack-plugin`
+
+Webpack默认只会输出一个bundle的js文件, 如果要一并输出引用该script的html, 使用此插件.
+
+可以配置html的标签如meta,
+
+在里面定义的变量, 可以在html中以模板的方式渲染
+
+使用示例:
+
+```javascript
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+plugins: [
+    // ...
+    new HtmlWebpackPlugin({
+      title: "Webpack HTML Plugin",
+      template: "public/index.html",
+      meta: {
+        viewport: "width=device-width",
+      },
+    }),
+  ],
+```
+
+位于public目录下的模板html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1><%= htmlWebpackPlugin.options.title %></h1>
+  </body>
+</html>
+```
+
+输出:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width" />
+  </head>
+
+  <body>
+    <h1>Webpack HTML Plugin</h1>
+    <script src="bundle.js"></script>
+  </body>
+</html>
+```
+
+如需同时输出多个html,  在插件列表中实例化多个HtmlWebpackPlugin实例.
+
+### 文件拷贝
+
+Plugin: `copy-webpack-plugin`
+
+使用示例
+
+```javascript
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+
+// ...
+plugins: [
+	new CopyWebpackPlugin({
+    	patterns: ["public"],
+    }),
+]
+```
+
+### 其他插件
+
+提炼关键词, 搜索webpack插件
+
+### 开发一个插件
+
+#### Webpack编译时的钩子机制
+
+https://webpack.js.org/api/compiler-hooks/
+
+比如, 开发一个插件, 将bundle.js中的注释删除
+
+```javascript
+class MyPlugin {
+  apply(compiler) {
+    console.log("my-plugin launch");
+
+    // 在编译时将要向外输出打包结果时, 注册处理任务
+    compiler.hooks.emit.tap("MyPlugin", (compilation) => {
+      for (const name in compilation.assets) {
+        // console.log(name); // 文件名
+        // console.log(compilation.assets[name] .source()); // 文件内容
+        // console.log(compilation.assets[name].size()); // 文件内容大小
+        if (name.endsWith(".js")) {
+          const contents = compilation.assets[name].source();
+          const withoutComments = contents.replace(/\/\*\*+\*\//g, ""); // 删除注释
+            
+          // 将处理结果写回, 注意都是属性都是getter函数
+          compilation.assets[name] = {
+            source: () => withoutComments,
+            size: () => withoutComments.length,
+          };
+        }
+      }
+    });
+  }
+}
+```
+
+使用
+
+```javascript
+  plugins: [
+    new MyPlugin(),
+  ],
+```
 
 
 
