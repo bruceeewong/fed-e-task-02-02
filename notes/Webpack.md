@@ -92,9 +92,132 @@ JavaScript驱动整个前端应用, 在JS里引入其他文件,比较合理.
 
 Loader: `file-loader`
 
-在Webpack中打包时,导出文件路径.
+在Webpack中打包时,拷贝到输出目录, 将导出后的文件路径作为模块的返回值返回, 对外导出.
 
 改变静态资源前缀路径: 在`webpack`配置文件处定义 `publicPath` 为 `path/to/`, 在webpack内部以`__webpack_require__.p `作为路径前缀取拼接资源路径,所以最后面的斜线不能漏掉
+
+### DATA-URL加载器
+
+`Data URLs` 是一种用url表示文件内容的URL协议.
+
+```
+// 协议 |  媒体类型和编码     | 文件内容
+data:[<mediatype>][;base64],<data>
+```
+
+例如, html文件可以表示为:
+
+```
+data:text/html;charset:UTF-8,<h1>html content</h1>
+```
+
+图片资源:
+
+```
+data:image/png;base64,djslkagviosj...
+```
+
+对体积比较小的资源,直接用`url-loader`转为`data-url`,减少HTTP请求的次数;
+
+对于大文件,还是采用`file-loader`抽出,引入路径.
+
+配置示意(注意要同时安装`file-loader`)
+
+```javascript
+{
+    test: /\.png$/,
+    use: {
+    	loader: "url-loader",
+        options: {
+        	limit: 10 * 1024, // 10kb
+        },
+    },
+},
+```
+
+### html-loader
+
+默认只会对`img:src`执行资源加载, 要支持如`a`标签的`href`要单独配置
+
+### 其他常用加载器
+
+分类:
+
+1. 编译转换类: 将资源模块转为JavaScript代码
+2. 文件操作类
+3. 代码检查类: ESLint
+
+## Webpack 处理ES2015
+
+webpack只是打包工具, 核心只识别`import/export`,并不能转换ES2015以上语法
+
+使用`babel-loader`处理JS语法新特性, 安装`babel-loader`, `@babel/core`, `@babel/preset-env`
+
+## Webpack模块加载方式
+
+### 兼容多种
+
+1. 遵循ES Module的import
+
+2. 遵循CommonJS标准的require: 注意引入时使用`const aa = require('./aa.js').default`要用模块的`default`
+
+3. 遵循AMD标准的define/require
+
+几种触发方式
+
+1. js的import
+2. css的@import, url函数
+3. html标签,  href, src等
+
+## Webpack核心工作过程
+
+以JS为入口, 加载所有依赖, 交给对应的Loader处理,最后输出打包结果, 其中Loader是绝对核心.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
