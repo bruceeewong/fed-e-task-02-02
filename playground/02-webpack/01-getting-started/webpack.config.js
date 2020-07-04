@@ -4,6 +4,7 @@ module.exports = {
   mode: "none",
   entry: "./src/main.js",
   output: {
+    publicPath: "dist/",
     filename: "bundle.js",
     path: path.join(__dirname, "dist"),
   },
@@ -12,6 +13,10 @@ module.exports = {
       {
         test: /\.css$/,
         use: ["style-loader", "css-loader"],
+      },
+      {
+        test: /\.png$/,
+        use: "file-loader",
       },
     ],
   },

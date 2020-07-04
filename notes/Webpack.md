@@ -80,9 +80,55 @@ mode
 
 ## Webpack资源模块加载
 
-处理CSS等非JS文件，需要安装对应的`loader`
+核心: `Loader`, 通过Loader可以加载任何类型的资源.
+
+JavaScript驱动整个前端应用, 在JS里引入其他文件,比较合理.
 
 ### CSS模块
 
 需要`css-loader`,  `style-loader`处理器, `css-loader`的作用是将CSS代码转换为JS代码，`style-loader`的作用是将`css-loader`的输出以`<style>`标签的形式追加到html head中，使样式生效。
+
+### 文件资源加载器
+
+Loader: `file-loader`
+
+在Webpack中打包时,导出文件路径.
+
+改变静态资源前缀路径: 在`webpack`配置文件处定义 `publicPath` 为 `path/to/`, 在webpack内部以`__webpack_require__.p `作为路径前缀取拼接资源路径,所以最后面的斜线不能漏掉
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
