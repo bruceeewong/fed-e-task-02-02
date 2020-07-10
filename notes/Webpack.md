@@ -412,19 +412,223 @@ devServer: {
 }
 ```
 
+### SourceMap
 
+Source Map记录着转换后的代码与源代码映射关系, 对调试源代码非常有帮助
 
+里面含
 
+* version
+* sources
+* names
+* mappings: 压缩后的映射内容
 
+source map注释 , 浏览器会请求该文件,逆向解析转换后的代码
 
+```
+//# sourcemappingURL=jquery-3.4.1.min.map
+```
 
+#### Webpack中的source map模式
 
+在配置中的`devtool`配置sourcemap, 支持的模式有:
 
+```javascript
+const allowModes = [
+  "eval",
+  "source-map",
+  "inline-source-map",
+  "hidden-source-map",
+  "nosources-source-map",
+  "eval-source-map",
+  "cheap-source-map",
+  "cheap-module-source-map",
+  "cheap-eval-source-map",
+  "cheap-module-eval-source-map",
+  "inline-cheap-source-map",
+  "inline-cheap-module-source-map",
+];
+```
 
+##### eval
 
+```javascript
+devtool: 'eval'
+```
 
+原理:
 
+JS中的eval语句 , 在`虚拟机`中运行包含js代码的字符串
 
+```javascript
+eval("console.log('123')")
+```
+
+若加上sourceURL即可标识其执行文件的位置
+
+```javascript
+eval("console.log('123') //# sourceURL=./foo/bar.js")
+```
+
+应用:
+
+直接将编译后的代码,写进eval函数中,并在尾部添加sourceURL标注路径
+
+优点:
+
+1. 构建速度快
+
+缺点:
+
+​	1. 只能标注出错的文件, 不能指出错误的行列信息
+
+##### source-map
+
+生成了source-map, 可以定位到行列错误
+
+##### cheap-source-map
+
+阉割版的source-map, 只能定位到行错误,速度较快
+
+##### cheap-eval-source-map
+
+可以定位到转换后的代码的位置
+
+##### cheap-module-eval-source-map
+
+可以定位到源代码的位置
+
+##### hidden-source-map
+
+开发第三方包, 没有通过URL引入, 需要定位错误时再引入
+
+##### nosources-source-map
+
+能看到错误信息,行列信息,但隐藏了源代码,保护源代码不暴露
+
+#### 最佳实践
+
+##### 开发环境
+
+```javascript
+devtool: 'cheap-module-eval-source-map'
+```
+
+Vue/React框架转换后差异大,需要定位转换前的代码；构建速度慢,但是重新构建速度快.
+
+##### 生产环境
+
+选择  `none`或者 `nosources-source-map`
+
+### 模块热更新
+
+Hot Module Replacement (HMR), 更新页面不会改变当前的状态
+
+在启动devServer时,自动加载更新的代码,而不刷新页面,极大提升开发效率
+
+Webpack中, 使用`--hot`开启热更新功能 
+
+```
+webpack-dev-server --hot
+```
+
+或者通过配置
+
+```javascript
+const webpack = require('webpack')
+module.export = {
+    devServer: {
+        hot: true // 开启热更新
+    },
+    plugins: [
+        new webpack.HotModuleReplacementPlugin()  // 加载webpack自带的插件
+    ]
+}
+```
+
+配置完后, 样式文件的热替换生效,但是JS的更新还是会刷新页面??
+
+#### HMR疑惑: JavaScript模块的热更新
+
+>  HMR没法开箱即用,需要根据文件类型的热替换逻辑
+
+样式模块更新只要把更新的代码块替换上去覆盖样式即可.
+
+但脚本文件等引用, 导出, 毫无规律,没法做通用的替换.
+
+使用框架开发, 项目中每个文件都是有规则, 就有通用的替换办法
+
+#### HMR APIs
+
+自定义处理JS模块的更新
+
+使用API可以监听到文件的变化, 但是需要自己实现替换的逻辑
+
+```
+module.hot.accept('/path/to/file', () => { // 热替换逻辑 })
+```
+
+#### 图片的模块热替换
+
+重新设置图片的`src`即可
+
+#### HMR热替换注意事项
+
+如果热替换失败, 会回退到页面刷新,把错误刷掉
+
+使用`hotOnly`: 无论热替换是否成功,都不会刷新页面.
+
+使用是需先判断是否存在`hot属性`
+
+```
+if (module.hot) {}
+```
+
+如果把插件中 webpack.HotModuleReplacementPlugin去掉, 以及去掉配置中的`hot`或者`hotOnly`, 相关的处理逻辑会变成, 从而不影响正常的代码
+
+```
+if (false) {}
+```
+
+## Webpack 生产环境优化
+
+配置: `mode`, 根据工作环境应用不同的配置
+
+```
+module.exports = (env, argv) => {
+	const config = {}
+	if (env === 'production') {}
+	return config
+}
+```
+
+#### 不同环境的配置文件
+
+如果项目过大, 还是要拆分配置文件:
+
+- webpack.common.js
+- webpack.dev.js
+- webpack.prod.js
+
+使用`webpack-merge`合并webpack配置
+
+使用是要`--config xxx.js`指定配置文件
+
+## Webpack DefinePlugin
+
+为代码注入全局成员, 注入process.env.NODE_ENV, 注入变量或代码片段
+
+设置一段符合JS语法的字面量语句, 直接替换代码片段
+
+```
+new webpack.DefinePlugin({
+	API_BASE_URL: '"http://api.example.com"',
+}),
+```
+
+```
+console.log(API_BASE_URL);
+```
 
 
 
