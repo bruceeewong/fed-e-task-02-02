@@ -10,7 +10,7 @@ class MyPlugin {
     compiler.hooks.emit.tap("MyPlugin", (compilation) => {
       for (const name in compilation.assets) {
         // console.log(name); // 文件名
-        // console.log(compilation.assets[name].source()); // 文件内容
+        // console.log(compilation.assets[name] .source()); // 文件内容
         // console.log(compilation.assets[name].size()); // 文件内容大小
         if (name.endsWith(".js")) {
           const contents = compilation.assets[name].source();

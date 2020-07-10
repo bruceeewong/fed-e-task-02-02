@@ -400,8 +400,14 @@ devServer {
 ```javascrip
 devServer: {
 	proxy: {
-		'^/api': {
-		}
+  	"/api": {
+      target: "https://api.github.com", // http://localhost:8080/api/* -> https://api.github.com/api/*
+      pathRewrite: {
+      "^/api": "", // http://localhost:8080/api/* -> https://api.github.com/*
+      },
+      // 默认的主机名是 localhost:8080 -> api.github.com
+      changeOrigin: true,
+    },
 	}
 }
 ```
