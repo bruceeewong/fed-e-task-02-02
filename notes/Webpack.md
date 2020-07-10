@@ -381,11 +381,11 @@ browser-sync dist/ --files '**/*
 
 集成自动编译+自动刷新页面的功能
 
-将打包结果存放在内存当中，内部HTTP Server将内存中的文件发给浏览器，减少磁盘读写，速度快。
+将打包结果存放在**内存**当中，内部HTTP Server将内存中的文件发给浏览器，减少磁盘读写，速度快。
 
 #### 静态资源
 
-```
+```javascript
 devServer {
 	contentBase: ''  // 静态资源地址
 }
@@ -393,7 +393,20 @@ devServer {
 
 #### API配置代理
 
-####  
+如果前后端不同源，且后端未开启CORS(跨域资源共享)设置，XHR响应在浏览器会被拦截。
+
+可以使用devServer做代理服务。
+
+```javascrip
+devServer: {
+	proxy: {
+		'^/api': {
+		}
+	}
+}
+```
+
+
 
 
 
