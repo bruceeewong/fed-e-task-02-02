@@ -630,21 +630,191 @@ new webpack.DefinePlugin({
 console.log(API_BASE_URL);
 ```
 
+## Tree Shaking
 
+将未引用代码标识为`dead code`, 并在打包时移除标记的未引用代码
 
+在webpack中`mode: production`自动开启.
 
+手动配置的话, 
 
+```javascript
+  optimization: {
+    // 标记模块(标记枯树叶), 根据是否被使用的成员
+    usedExports: true,
+    // 清除被标记的模块(摇树),压缩输出结果
+    minimize: true,
+  }
+```
 
+进一步优化,可以使用`concatenateModules`合并模块, 将所有模块提升至一个函数内, 配合minimize进一步压缩代码
 
+```javascript
+  optimization: {
+    // 标记模块(标记枯树叶), 根据是否被使用的成员
+    usedExports: true,
+    // 清除被标记的模块(摇树),压缩输出结果
+    minimize: true,
+    // 合并模块提升到一个函数中
+    concatenateModules: true
+  }
+```
 
+### 使用Babel导致TreeShaking失效
 
+使用Webpack打包必须是ESM,  而Babel-loader有可能将代码中的ES Modules -> CommonJS, Webpack再拿到的就是CommonJS组织的代码, Tree Shaking 失败. **最新Babel-Loader**已经将内部ES转换关闭
 
+配置Babel-loader的options, 手动开启ES模块转换
 
+```javascript
+{
+    loader: 'babel-loader',
+    options: {
+        presets: [
+            ['@babel/preset-env', { modules: 'commonjs' }]  // 默认为 false
+        ]
+    }
+}
+```
 
+## SideEffect
 
+副作用指代码可以影响函数块之外的环境, 如JS给原型链挂载方法, CSS影响样式等.
 
+```javascript
+// webpack.config.js
+optimization: {
+	sizeEffects: true
+}
+```
 
+然后在项目`package.json`中指定有副作用的模块, 如果没有副作用, 没有用到的模块就不会被打包进来
 
+```
+// package.json
+{
+	"sideEffects": false // 项目下所有模块都没有副作用
+}
+```
+
+## Code Splitting
+
+代码分包.
+
+模块化开发,每个模块可能很小,导致打包模块过多,太散. 而HTTP 1.1 存在`同域并行请求限制`
+
+分包情形
+
+1. 多入口打包
+2. 动态导入
+
+### 多入口打包
+
+适用多页应用开发,
+
+entry多入口打包:
+
+```
+entry: {
+	index: './src/index.js',
+	album: './src/album.js'
+},
+output: {
+	filename: '[name].bundle.js'  // 占位符动态导出名字
+}
+```
+
+### 提取公共模块
+
+以下配置可以将多文件共同引用的文件单独导出到一个公共文件中
+
+```javascript
+optimization: {
+    splitChunks: {
+        chunks: 'all'
+    }
+}
+```
+
+### 动态导入
+
+Webpack提供的`import`函数. 配合魔法注释 
+
+```
+import(/* webpackChunkName: 'components' */'./posts/posts').then(...)
+```
+
+相同chunkName的会打包到一起
+
+### MiniCssExtractPlugin
+
+之前采用style-loader会将CSS写入页面, 而使用此插件, 可以将结果抽取CSS代码到文件
+
+```
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+// webpack.config.js
+{
+	module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          // 'style-loader', // 将样式通过 style 标签注入
+          MiniCssExtractPlugin.loader,  // 使用插件的loader
+          "css-loader",
+        ],
+      },
+    ],
+  },
+  plugins: [
+  	// ...
+    new MiniCssExtractPlugin(),
+  ],
+}
+```
+
+最佳实践: 如果CSS文件操作150kb, 考虑抽取成文件
+
+## 压缩CSS文件
+
+plugin `OptimizeCssAssetsWebpackPlugin`
+
+官方文档中,不是配置到plugin数组中, 配置到`optimaztion`的`minimizer`, 由minimize统一控制
+
+```
+optimization: {
+    minimizer: [
+        new OptimizeCssAssetsWebpackPlugin(),
+    ],
+},
+```
+
+## 压缩JS文件
+
+plugin `TerserWebpackPlugin`
+
+```javascript
+optimization: {
+    minimizer: [
+        new TerserWebpackPlugin(),
+    ],
+},
+```
+
+## 文件名Hash
+
+作用:解决浏览器缓存失效时间长, 更新时不生效的问题.
+
+占位符的哈希有三种:
+
+1. [hash] 项目级别, 项目变了就变
+2. [chunkhash] 模块级别
+3. [contenthash] 文件级别, 最适合解决缓存问题
+
+占位符指定长度, 8位contenthash在实践中最好  
+
+ ```filename: [name]-[contenthash:8].js```
 
 
 
