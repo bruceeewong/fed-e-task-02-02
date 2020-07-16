@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "webpack-dev-server --config webpack.dev.js",
     "build": "echo \"请使用 Webpack 实现此任务\"",
-    "lint": "echo \"请使用 ESLint 实现此任务\""
+    "lint": "eslint . --fix"
   },
   "dependencies": {
     "core-js": "^3.6.5",
@@ -21,6 +21,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "eslint-plugin-vue": "^6.2.2",
     "file-loader": "^6.0.0",
+    "html-webpack-plugin": "^4.3.0",
     "less-loader": "^6.2.0",
     "style-loader": "^1.2.1",
     "url-loader": "^4.1.0",
