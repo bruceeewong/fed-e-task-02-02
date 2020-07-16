@@ -1,12 +1,14 @@
 const path = require('path')
 const webpack = require('webpack')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const CopyPlugin = require('copy-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
   entry: './src/main.js',
   output: {
-    filename: '[name]-[contenthash:8].js',
+    filename: '[name].js',
     path: path.join(__dirname, 'dist')
   },
   module: {
@@ -14,6 +16,12 @@ module.exports = {
       {
         test: /\.vue$/,
         use: 'vue-loader'
+      },
+      {
+        test: /\.js$/,
+        use: {
+          loader: 'babel-loader'
+        }
       },
       {
         test: /\.css$/,
@@ -39,6 +47,15 @@ module.exports = {
     new VueLoaderPlugin(),
     new webpack.DefinePlugin({
       BASE_URL: '"/"' // 导出的是js字面量
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: 'public', to: '' }
+      ]
+    }),
+    new HtmlWebpackPlugin({
+      template: './public/index.html',
+      title: 'Webpack For Vue'
     })
   ]
 }

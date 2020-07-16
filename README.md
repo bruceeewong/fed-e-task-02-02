@@ -46,13 +46,14 @@ Plugin： 插件主要用于在webpack打包的生命周期中添加自定义任
    1. 入口文件
    2. 输出
       1. 路径
-      2. 输出文件名，带contenthash
+      2. 输出文件名
 2. 代码编译
    1. Vue文件编译: `vue-loader`/`vue-template-compiler`
       1. vue文件编译
       2. css代码处理: `css-loader` `style-loader`
    2. JavaScript新特性语法编译: `babel-loader`/`@babel/core`/`@babel/preset-env`
    3. Sass语法编译: `sass-loader`/`sass`
+   4. html link href 路径处理
 3. 代码风格检测
    1. 使用`standard`风格 `eslint-loader`/`eslint-plugin-standard`
 4. 资源加载
@@ -72,6 +73,8 @@ Plugin： 插件主要用于在webpack打包的生命周期中添加自定义任
 3. 样式内联
    1. 样式写进html style: `style-loader`
 4. 生成`cheap-module-eval-source-map`便于调试
+5. 代码打包构建优化
+   1. 输出文件名，带contenthash, 防止缓存
 
 #### 生产环境
 
