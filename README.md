@@ -42,14 +42,24 @@ Plugin： 插件主要用于在webpack打包的生命周期中添加自定义任
 
 #### 公共能力
 
-1. 代码编译
-   1. JavaScript新特性语法编译: `babel-loader`/`@babel/core`/`@babel/preset-env`
-   2. Sass语法编译: `sass-loader`/`sass`
-2. 代码风格检测
+1. 输入输出
+   1. 入口文件
+   2. 输出
+      1. 路径
+      2. 输出文件名，带contenthash
+2. 代码编译
+   1. Vue文件编译: `vue-loader`/`vue-template-compiler`
+      1. vue文件编译
+      2. css代码处理: `css-loader` `style-loader`
+   2. JavaScript新特性语法编译: `babel-loader`/`@babel/core`/`@babel/preset-env`
+   3. Sass语法编译: `sass-loader`/`sass`
+3. 代码风格检测
    1. 使用`standard`风格 `eslint-loader`/`eslint-plugin-standard`
-3. 资源加载
+4. 资源加载
    1. 处理静态资源文件（图片、字体），对小文件编码成Base64:`url-loader`/`file-loader`
    2. 拷贝公共路径文件: `copy-webpack-plugin`
+5. 配置合并: `webpack-merge-plugin`
+6. Webpack配置类型提示: `/** @type {import('webpack').Configuration} */`
 
 #### 开发环境
 
