@@ -4,12 +4,15 @@
   "private": true,
   "scripts": {
     "serve": "webpack-dev-server --config webpack.dev.js",
+    "build:dev": "webpack --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
     "lint": "eslint . --fix"
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "vue": "^2.6.11"
+    "element-ui": "^2.13.2",
+    "vue": "^2.6.11",
+    "vue-router": "^3.3.4"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",
@@ -20,6 +23,7 @@
     "css-loader": "^3.6.0",
     "eslint": "^7.4.0",
     "eslint-config-standard": "^14.1.1",
+    "eslint-loader": "^4.0.2",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",

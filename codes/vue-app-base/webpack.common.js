@@ -6,42 +6,22 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
+  // 入口定义
   entry: './src/main.js',
+  // 输出定义
   output: {
-    filename: '[name].js',
+    filename: '[name].bundle.js',
     path: path.join(__dirname, 'dist')
   },
-  module: {
-    rules: [
-      {
-        test: /\.vue$/,
-        use: 'vue-loader'
-      },
-      {
-        test: /\.js$/,
-        use: {
-          loader: 'babel-loader'
-        }
-      },
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader']
-      },
-      {
-        test: /\.less$/,
-        use: ['style-loader', 'css-loader', 'less-loader']
-      },
-      {
-        test: /\.(jpe?g|png|gif)$/,
-        use: {
-          loader: 'url-loader',
-          options: {
-            esModule: false, // 默认按es module打包, 导致前端加载不出图片
-            limit: 8 * 1024
-          }
-        }
-      }
-    ]
+  resolve: {
+    alias: {
+      '@': path.join(__dirname, 'src') // 全局名称
+    }
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all' // 公共模块拆分
+    }
   },
   plugins: [
     new VueLoaderPlugin(),
